@@ -3,16 +3,21 @@ package relog
 import (
 	"fmt"
 	"io"
+	"sync"
 )
 
 type Logger struct {
 	w         io.Writer
+	mu        *sync.Mutex
 	entries   []entry
 	cursorPos int
 }
 
 func NewLogger(w io.Writer) *Logger {
-	return &Logger{w: w}
+	return &Logger{
+		w:  w,
+		mu: new(sync.Mutex),
+	}
 }
 
 func (l *Logger) Close() error {
@@ -26,6 +31,9 @@ type entry struct {
 
 // Log a message. If `id` is seen before then update that line, otherwise write at the end.
 func (l *Logger) Log(id, msg string) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	for i, e := range l.entries {
 		if e.id == id {
 			return l.rewrite(i, msg)
