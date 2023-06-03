@@ -20,9 +20,6 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	if err := l.Close(); err != nil {
-		log.Fatal(err)
-	}
 
 	fmt.Print("\nDone\n")
 }
